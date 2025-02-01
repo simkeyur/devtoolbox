@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="95" fill="#2d2d2d" stroke="#00ffcc" stroke-width="5" />
+
+  <!-- Code Brackets -->
+  <path d="M 60 70 L 60 130 L 80 130 L 80 120 L 70 120 L 70 80 L 80 80 L 80 70 Z" fill="#00ffcc" />
+  <path d="M 140 70 L 140 130 L 120 130 L 120 120 L 130 120 L 130 80 L 120 80 L 120 70 Z" fill="#00ffcc" />
+
+  <!-- Equal Signs (Representing Base64 Encoding) -->
+  <rect x="85" y="85" width="30" height="5" fill="#00ffcc" />
+  <rect x="85" y="95" width="30" height="5" fill="#00ffcc" />
+  <rect x="85" y="105" width="30" height="5" fill="#00ffcc" />
+
+  <!-- Clock Icon (Representing Cron Jobs) -->
+  <circle cx="150" cy="50" r="10" fill="none" stroke="#00ffcc" stroke-width="3" />
+  <line x1="150" y1="50" x2="150" y2="40" stroke="#00ffcc" stroke-width="3" />
+  <line x1="150" y1="50" x2="155" y2="55" stroke="#00ffcc" stroke-width="3" />
+
+  <!-- Text: Dev Tools -->
+  <text x="100" y="170" font-size="20" fill="#00ffcc" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold">Dev Tools</text>
+</svg>

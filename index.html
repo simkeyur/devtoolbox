@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dev Tools - Base64 & Cron Reader</title>
+  <!-- Bootstrap CSS -->
+  <link rel="manifest" href="manifest.json">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #1a1a1a;
+      color: #ffffff;
+    }
+    .navbar {
+      background-color: #2d2d2d;
+    }
+    .navbar-brand {
+      color: #00ffcc !important;
+      font-weight: bold;
+    }
+    .panel {
+      background-color: #2d2d2d;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    textarea {
+      resize: vertical;
+      background-color: #333;
+      color: #fff;
+      border: 1px solid #444;
+    }
+    textarea:focus {
+      background-color: #333;
+      color: #fff;
+      border-color: #00ffcc;
+    }
+    .btn-primary {
+      background-color: #00ffcc;
+      border-color: #00ffcc;
+      color: #1a1a1a;
+      font-weight: bold;
+    }
+    .btn-primary:hover {
+      background-color: #00e6b8;
+      border-color: #00e6b8;
+    }
+    .error-message {
+      color: #ff6b6b;
+      font-size: 14px;
+    }
+    .cron-explanation {
+      background-color: #333;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    .helpful-links {
+      margin-top: 40px;
+      text-align: center;
+    }
+    .helpful-links .btn {
+      margin: 5px;
+    }
+    .credits {
+      text-align: center;
+      margin-top: 40px;
+      color: #ccc;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Dev Tools</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container mt-4">
+    <div class="row">
+      <!-- Base64 Encoder/Decoder -->
+      <div class="col-md-6">
+        <div class="panel">
+          <h2>Base64 Encoder & Decoder</h2>
+          <textarea id="base64-input" class="form-control mb-3" placeholder="Enter text or Base64 here..." rows="4"></textarea>
+          <div class="d-grid gap-2">
+            <button id="encode-btn" class="btn btn-primary">Encode</button>
+            <button id="decode-btn" class="btn btn-primary">Decode</button>
+          </div>
+          <button id="copy-base64" class="btn btn-primary w-100 mt-3">Copy Result</button>
+          <textarea id="base64-output" class="form-control mt-3" placeholder="Result will appear here..." rows="4" readonly></textarea>
+          <p id="base64-error" class="error-message mt-2"></p>
+        </div>
+      </div>
+
+      <!-- Cron Job Reader -->
+      <div class="col-md-6">
+        <div class="panel">
+          <h2>Cron Job Reader</h2>
+          <input type="text" id="cron-input" class="form-control mb-3" placeholder="Enter a cron expression (e.g., 0 0 * * * *)" />
+          <button id="explain-cron" class="btn btn-primary w-100">Explain Cron</button>
+          <div class="cron-explanation mt-3" id="cron-explanation">
+            <strong>Explanation:</strong> Enter a valid cron expression to see its explanation.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Helpful Links -->
+    <div class="helpful-links">
+      <h4 class="text-center mt-5 mb-3">Helpful Links</h4>
+      <div class="d-flex justify-content-center flex-wrap">
+        <a href="https://simkeyur.github.io/RunJS/" class="btn btn-primary" target="_blank">RunJS - JavaScript Runner</a>
+        <a href="https://simkeyur.github.io/Jsonic" class="btn btn-primary" target="_blank">Jsonic - JSON Linter</a>
+        <a href="https://simkeyur.github.io/csv2json" class="btn btn-primary" target="_blank">CSV to JSON Converter</a>
+      </div>
+    </div>
+
+    <!-- Credits -->
+    <div class="credits">
+      Made by <a href="https://simkeyur.github.io" target="_blank" style="color: #00ffcc; text-decoration: none;">simkeyur.github.io</a>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Base64 Encoder/Decoder
+    const base64Input = document.getElementById('base64-input');
+    const base64Output = document.getElementById('base64-output');
+    const encodeBtn = document.getElementById('encode-btn');
+    const decodeBtn = document.getElementById('decode-btn');
+    const copyBase64Btn = document.getElementById('copy-base64');
+    const base64Error = document.getElementById('base64-error');
+
+    encodeBtn.addEventListener('click', () => {
+      try {
+        const encoded = btoa(base64Input.value);
+        base64Output.value = encoded;
+        base64Error.textContent = '';
+      } catch (error) {
+        base64Error.textContent = 'Invalid input for encoding.';
+      }
+    });
+
+    decodeBtn.addEventListener('click', () => {
+      try {
+        const decoded = atob(base64Input.value);
+        base64Output.value = decoded;
+        base64Error.textContent = '';
+      } catch (error) {
+        base64Error.textContent = 'Invalid Base64 input for decoding.';
+      }
+    });
+
+    copyBase64Btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(base64Output.value);
+      alert('Copied to clipboard!');
+    });
+
+    // Cron Job Reader
+    const cronInput = document.getElementById('cron-input');
+    const explainCronBtn = document.getElementById('explain-cron');
+    const cronExplanation = document.getElementById('cron-explanation');
+
+    explainCronBtn.addEventListener('click', () => {
+      const cronExpression = cronInput.value.trim();
+      if (!cronExpression) {
+        cronExplanation.innerHTML = `<strong>Error:</strong> Please enter a cron expression.`;
+        return;
+      }
+
+      const parts = cronExpression.split(' ');
+      if (parts.length !== 6) {
+        cronExplanation.innerHTML = `<strong>Error:</strong> Invalid cron expression. It must have 6 parts (seconds, minutes, hours, day of month, month, day of week).`;
+        return;
+      }
+
+      const [seconds, minutes, hours, dayOfMonth, month, dayOfWeek] = parts;
+
+      const explanation = `
+        <strong>Explanation:</strong> This cron job will run:
+        <ul>
+          <li><strong>Seconds:</strong> ${seconds}</li>
+          <li><strong>Minutes:</strong> ${minutes}</li>
+          <li><strong>Hours:</strong> ${hours}</li>
+          <li><strong>Day of Month:</strong> ${dayOfMonth}</li>
+          <li><strong>Month:</strong> ${month}</li>
+          <li><strong>Day of Week:</strong> ${dayOfWeek}</li>
+        </ul>
+      `;
+
+      cronExplanation.innerHTML = explanation;
+    });
+
+    if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js');
+    }
+  </script>
+</body>
+</html>
