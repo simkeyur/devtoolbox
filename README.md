@@ -2,7 +2,7 @@
 
 A modern web app for developers, featuring a **Base64 Encoder/Decoder**, **Cron Job Reader**, and helpful utilities. Built with simplicity and functionality in mind.
 
-![Dev Tools Logo](logo.svg)
+![Dev Tools Screenshot](screenshot.png)
 
 ## Features
 
