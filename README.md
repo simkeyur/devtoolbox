@@ -1,7 +1,7 @@
 # Dev Tools
 
 A modern web app for developers, featuring a **Base64 Encoder/Decoder**, **Cron Job Reader**, and helpful utilities. Built with simplicity and functionality in mind.
-
+[Dev Tools Live Demo](https://simkeyur.github.io/devtoolbox)
 ![Dev Tools Screenshot](screenshot.png)
 
 ## Features
@@ -10,11 +10,6 @@ A modern web app for developers, featuring a **Base64 Encoder/Decoder**, **Cron 
 - **Cron Job Reader**: Understand cron expressions with a human-readable explanation.
 - **Helpful Links**: Quick access to tools like RunJS, Jsonic, and CSV to JSON Converter.
 - **PWA Support**: Installable and works offline.
-
-## Live Demo
-
-Check out the live demo hosted on GitHub Pages:  
-[Dev Tools Live Demo](https://simkeyur.github.io/devtoolbox)
 
 ## How to Use
 
