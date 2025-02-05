@@ -163,73 +163,74 @@
       alert('Copied to clipboard!');
     });
 
-    // Cron Job Reader
-    const cronInput = document.getElementById('cron-input');
-    const explainCronBtn = document.getElementById('explain-cron');
-    const cronExplanation = document.getElementById('cron-explanation');
-    
-    explainCronBtn.addEventListener('click', () => {
-      const cronExpression = cronInput.value.trim();
-      if (!cronExpression) {
-        cronExplanation.innerHTML = `<strong>Error:</strong> Please enter a cron expression.`;
-        return;
-      }
-    
-      const parts = cronExpression.split(' ');
-      if (parts.length !== 6) {
-        cronExplanation.innerHTML = `<strong>Error:</strong> Invalid cron expression. It must have 6 parts (seconds, minutes, hours, day of month, month, day of week).`;
-        return;
-      }
-    
-      const [seconds, minutes, hours, dayOfMonth, month, dayOfWeek] = parts;
-    
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    
-      let schedule = '';
-      
-      if (dayOfMonth === '*' && dayOfWeek === '*') {
-        schedule = 'every day';
-      } else if (dayOfMonth !== '*' && dayOfWeek === '*') {
-        schedule = `on the ${dayOfMonth}${getOrdinal(dayOfMonth)} of every month`;
-      } else if (dayOfMonth === '*' && dayOfWeek !== '*') {
-        schedule = `every ${dayNames[parseInt(dayOfWeek, 10)]}`;
-      }
-    
-      if (month !== '*') {
-        schedule += ` in ${monthNames[parseInt(month, 10) - 1]}`;
-      }
-    
-      let time = '';
-      if (hours === '*' && minutes === '*') {
-        time = 'every minute';
-      } else if (hours !== '*' && minutes === '*') {
-        time = `every minute at ${formatTime(hours, '00')}`;
-      } else if (hours !== '*' && minutes !== '*') {
-        time = `at ${formatTime(hours, minutes)}`;
-      }
-    
-      cronExplanation.innerHTML = `
-        <strong>Explanation:</strong> This cron job will run ${schedule} ${time}.
-      `;
-    });
-    
-    function formatTime(hours, minutes) {
-      let h = parseInt(hours, 10);
-      let m = parseInt(minutes, 10);
-      let period = h >= 12 ? 'PM' : 'AM';
-      h = h % 12 || 12; 
-      return `${h}:${m.toString().padStart(2, '0')} ${period}`;
+   // Cron Job Reader
+  const cronInput = document.getElementById('cron-input');
+  const explainCronBtn = document.getElementById('explain-cron');
+  const cronExplanation = document.getElementById('cron-explanation');
+  
+  explainCronBtn.addEventListener('click', () => {
+    const cronExpression = cronInput.value.trim();
+    if (!cronExpression) {
+      cronExplanation.innerHTML = `<strong>Error:</strong> Please enter a cron expression.`;
+      return;
     }
-    
-    function getOrdinal(n) {
-      let j = n % 10, k = n % 100;
-      if (j === 1 && k !== 11) return 'st';
-      if (j === 2 && k !== 12) return 'nd';
-      if (j === 3 && k !== 13) return 'rd';
-      return 'th';
+  
+    const parts = cronExpression.split(' ');
+    if (parts.length !== 6) {
+      cronExplanation.innerHTML = `<strong>Error:</strong> Invalid cron expression. It must have 6 parts (seconds, minutes, hours, day of month, month, day of week).`;
+      return;
     }
-
+  
+    const [seconds, minutes, hours, dayOfMonth, month, dayOfWeek] = parts;
+  
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  
+    let schedule = '';
+    
+    if (dayOfMonth === '?' && dayOfWeek !== '*' && dayOfWeek !== '?') {
+      schedule = `every ${dayNames[parseInt(dayOfWeek, 10)]}`;
+    } else if (dayOfWeek === '?' && dayOfMonth !== '*' && dayOfMonth !== '?') {
+      schedule = `on the ${dayOfMonth}${getOrdinal(dayOfMonth)} of every month`;
+    } else if ((dayOfMonth === '*' || dayOfMonth === '?') && (dayOfWeek === '*' || dayOfWeek === '?')) {
+      schedule = 'every day';
+    } else if (dayOfMonth !== '*' && dayOfWeek !== '*') {
+      schedule = `on the ${dayOfMonth}${getOrdinal(dayOfMonth)} of every month and every ${dayNames[parseInt(dayOfWeek, 10)]}`;
+    }
+  
+    if (month !== '*') {
+      schedule += ` in ${monthNames[parseInt(month, 10) - 1]}`;
+    }
+  
+    let time = '';
+    if (hours === '*' && minutes === '*') {
+      time = 'every minute';
+    } else if (hours !== '*' && minutes === '*') {
+      time = `every minute at ${formatTime(hours, '00')}`;
+    } else if (hours !== '*' && minutes !== '*') {
+      time = `at ${formatTime(hours, minutes)}`;
+    }
+  
+    cronExplanation.innerHTML = `
+      <strong>Explanation:</strong> This cron job will run ${schedule} ${time}.
+    `;
+  });
+  
+  function formatTime(hours, minutes) {
+    let h = parseInt(hours, 10);
+    let m = parseInt(minutes, 10);
+    let period = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12; 
+    return `${h}:${m.toString().padStart(2, '0')} ${period}`;
+  }
+  
+  function getOrdinal(n) {
+    let j = n % 10, k = n % 100;
+    if (j === 1 && k !== 11) return 'st';
+    if (j === 2 && k !== 12) return 'nd';
+    if (j === 3 && k !== 13) return 'rd';
+    return 'th';
+  }
 
     if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/service-worker.js');
