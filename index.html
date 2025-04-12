@@ -97,6 +97,27 @@
         </div>
       </div>
 
+       <!-- URL Encoder/Decoder -->
+       <div class="col-md-6">
+        <div class="panel">
+          <h2>URL Encoder & Decoder</h2>
+          <textarea id="url-input" class="form-control mb-3" 
+            placeholder="Enter URL to encode/decode..." rows="4"></textarea>
+          <div class="d-grid gap-2">
+            <button id="encode-url-btn" class="btn btn-primary">Encode URL</button>
+            <button id="decode-url-btn" class="btn btn-primary">Decode URL</button>
+          </div>
+          <button id="copy-url" class="btn btn-primary w-100 mt-3">Copy Result</button>
+          <textarea id="url-output" class="form-control mt-3" 
+            placeholder="Result will appear here..." rows="4" readonly></textarea>
+          <p id="url-error" class="error-message mt-2"></p>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="row">
       <!-- Cron Job Reader -->
       <div class="col-md-6">
         <div class="panel">
@@ -108,7 +129,21 @@
           </div>
         </div>
       </div>
-    </div>
+
+      <!-- Ascii Validator -->
+      <div class="col-md-6">
+        <div class="panel">
+          <h2>ASCII Validator</h2>
+          <textarea id="ascii-input" class="form-control mb-3" 
+            placeholder="Type or paste text to validate ASCII characters..." 
+            rows="4"></textarea>
+          <div id="ascii-result" class="cron-explanation mt-3">
+            <strong>Status:</strong> Start typing to validate ASCII characters.
+          </div>
+        </div>
+      </div>
+</div>
+     </div>
 
     <!-- Helpful Links -->
     <div class="helpful-links">
@@ -231,6 +266,71 @@
     if (j === 3 && k !== 13) return 'rd';
     return 'th';
   }
+
+    // ASCII Validator
+    const asciiInput = document.getElementById('ascii-input');
+    const asciiResult = document.getElementById('ascii-result');
+
+    asciiInput.addEventListener('input', () => {
+      const text = asciiInput.value;
+      let isAscii = true;
+      let nonAsciiChars = [];
+
+      for (let i = 0; i < text.length; i++) {
+        if (text.charCodeAt(i) > 127) {
+          isAscii = false;
+          nonAsciiChars.push({
+            char: text[i],
+            position: i + 1,
+            code: text.charCodeAt(i)
+          });
+        }
+      }
+
+      if (text.length === 0) {
+        asciiResult.innerHTML = `<strong>Status:</strong> Start typing to validate ASCII characters.`;
+      } else if (isAscii) {
+        asciiResult.innerHTML = `<strong>Status:</strong> <span style="color: #00ffcc;">✓ Valid ASCII</span> - All characters are within ASCII range (0-127).`;
+      } else {
+        let details = nonAsciiChars.map(c => 
+          `'${c.char}' at position ${c.position} (code: ${c.code})`
+        ).join(', ');
+        asciiResult.innerHTML = `<strong>Status:</strong> <span style="color: #ff6b6b;">✗ Invalid ASCII</span><br>Non-ASCII characters found: ${details}`;
+      }
+    });
+
+    // URL Encoder/Decoder
+    const urlInput = document.getElementById('url-input');
+    const urlOutput = document.getElementById('url-output');
+    const encodeUrlBtn = document.getElementById('encode-url-btn');
+    const decodeUrlBtn = document.getElementById('decode-url-btn');
+    const copyUrlBtn = document.getElementById('copy-url');
+    const urlError = document.getElementById('url-error');
+
+    encodeUrlBtn.addEventListener('click', () => {
+      try {
+        const encoded = encodeURIComponent(urlInput.value);
+        urlOutput.value = encoded;
+        urlError.textContent = '';
+      } catch (error) {
+        urlError.textContent = 'Invalid input for encoding.';
+      }
+    });
+
+    decodeUrlBtn.addEventListener('click', () => {
+      try {
+        const decoded = decodeURIComponent(urlInput.value);
+        urlOutput.value = decoded;
+        urlError.textContent = '';
+      } catch (error) {
+        urlError.textContent = 'Invalid URL format for decoding.';
+      }
+    });
+
+    copyUrlBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(urlOutput.value);
+      alert('Copied to clipboard!');
+    });
 
     if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/service-worker.js');
