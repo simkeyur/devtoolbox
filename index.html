@@ -142,8 +142,66 @@
           </div>
         </div>
       </div>
+  </div>
 </div>
-     </div>
+
+<div class="container mt-4">
+          <div class="row">
+            <div class="col-md-6 offset">
+              <div class="panel">
+                <h2>UUID Generator</h2>
+                <div class="d-grid gap-2 mb-3">
+                  <button id="generate-uuid-btn" class="btn btn-primary">Generate UUID</button>
+                </div>
+                <input type="text" id="uuid-output" class="form-control mb-2" readonly placeholder="Your UUID will appear here" />
+                <button id="copy-uuid-btn" class="btn btn-primary w-100">Copy UUID</button>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="panel">
+                <h2>JWT Validator</h2>
+                <textarea id="jwt-input" class="form-control mb-3" placeholder="Enter JWT token here..." rows="4"></textarea>
+                <button id="validate-jwt-btn" class="btn btn-primary w-100">Validate JWT</button>
+                <div id="jwt-result" class="cron-explanation mt-3">
+                  <strong>Status:</strong> Enter a token and click Validate.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+<div class="container mt-4">
+    <div class="row">
+      
+      <div class="col-md-12">
+        <div class="panel">
+          <h2>Timezone Converter</h2>
+          <div class="mb-3">
+            <label for="source-tz" class="form-label">Source Timezone</label>
+            <select id="source-tz" class="form-select">
+              <option value="UTC">GMT (UTC)</option>
+              <option value="PST">PST (US/Pacific)</option>
+              <option value="MST">MST (US/Mountain)</option>
+              <option value="CST">CST (US/Central)</option>
+              <option value="EST">EST (US/Eastern)</option>
+            </select>
+          </div>
+          <label for="src-datetime" class="form-label">Date & Time</label>
+          <div class="input-group mb-3">
+            <input type="datetime-local" id="src-datetime" class="form-control">
+            <button id="set-now-btn" class="btn btn-secondary">Now</button>
+          </div>
+          <button id="convert-tz-btn" class="btn btn-primary w-100">Convert to US Timezones</button>
+          <div id="tz-result" class="cron-explanation mt-3">
+            <strong>Result:</strong> Select timezone & date/time above.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UUID Generator -->
+  
 
     <!-- Helpful Links -->
     <div class="helpful-links">
@@ -332,9 +390,149 @@
       alert('Copied to clipboard!');
     });
 
-    if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js');
+    // JWT Validator
+    const jwtInput = document.getElementById('jwt-input');
+    const validateJwtBtn = document.getElementById('validate-jwt-btn');
+    const jwtResult = document.getElementById('jwt-result');
+
+    validateJwtBtn.addEventListener('click', () => {
+      const token = jwtInput.value.trim();
+      if (!token) {
+        jwtResult.innerHTML = `<strong>Error:</strong> Please enter a JWT token.`;
+        return;
+      }
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        jwtResult.innerHTML = `<strong>Error:</strong> Invalid JWT format. It should have three parts separated by dots.`;
+        return;
+      }
+      try {
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        const now = Math.floor(Date.now() / 1000);
+        let status = '<span style="color: #00ffcc;">✓ Valid JWT structure</span>';
+        if (payload.exp && now >= payload.exp) {
+          status = '<span style="color: #ff6b6b;">✗ JWT expired</span>';
+        }
+        const formattedPayload = JSON.stringify(payload, null, 2);
+        jwtResult.innerHTML = `
+          <strong>Status:</strong> ${status}
+          <div><strong>Payload:</strong><pre style="background-color: #333; color: #fff; padding: 10px; border-radius: 4px; margin-top: 5px; white-space: pre-wrap;">${formattedPayload}</pre></div>
+        `;
+      } catch (err) {
+        jwtResult.innerHTML = `<strong>Error:</strong> Failed to parse JWT payload.`;
+      }
+    });
+
+    // Timezone Converter (Source TZ selection)
+    const srcTzSelect = document.getElementById('source-tz');
+    const srcDatetimeInput = document.getElementById('src-datetime');
+    const setNowBtn = document.getElementById('set-now-btn');
+    const convertTzBtn = document.getElementById('convert-tz-btn');
+    const tzResult = document.getElementById('tz-result');
+    function getOffsetMinutesFromTZ(tz, date) {
+      if (tz === 'UTC') return 0;
+      const zoneMap = {
+        'PST': 'America/Los_Angeles',
+        'MST': 'America/Denver',
+        'CST': 'America/Chicago',
+        'EST': 'America/New_York'
+      };
+      const dtf = new Intl.DateTimeFormat('en-US', {
+        timeZone: zoneMap[tz],
+        timeZoneName: 'short'
+      });
+      const parts = dtf.formatToParts(date);
+      const tzName = parts.find(p => p.type === 'timeZoneName').value;
+      const isDst = tzName.endsWith('DT');
+      const stdOffsets = { 'PST': -8 * 60, 'MST': -7 * 60, 'CST': -6 * 60, 'EST': -5 * 60 };
+      const dstOffsets = { 'PST': -7 * 60, 'MST': -6 * 60, 'CST': -5 * 60, 'EST': -4 * 60 };
+      return isDst ? dstOffsets[tz] : stdOffsets[tz];
     }
+
+    setNowBtn.addEventListener('click', () => {
+      const tz = srcTzSelect.value;
+      const now = new Date();
+      const nowUtcMs = now.getTime();
+      const offsetMin = getOffsetMinutesFromTZ(tz, now);
+      const localTs = nowUtcMs + offsetMin * 60000;
+      const d = new Date(localTs);
+      const year = d.getUTCFullYear();
+      const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      const hour = String(d.getUTCHours()).padStart(2, '0');
+      const minute = String(d.getUTCMinutes()).padStart(2, '0');
+      srcDatetimeInput.value = `${year}-${month}-${day}T${hour}:${minute}`;
+    });
+
+    convertTzBtn.addEventListener('click', () => {
+      const inputVal = srcDatetimeInput.value;
+      const srcTz = srcTzSelect.value;
+      if (!inputVal) {
+        tzResult.innerHTML = `<strong>Error:</strong> Please select date/time and source timezone.`;
+        return;
+      }
+      const [datePart, timePart] = inputVal.split('T');
+      const [y, m, d] = datePart.split('-').map(Number);
+      const [h, mi] = timePart.split(':').map(Number);
+      const offsetMinSrc = getOffsetMinutesFromTZ(srcTz, new Date(Date.UTC(y, m - 1, d, h, mi)));
+      const utcTs = Date.UTC(y, m - 1, d, h, mi) - offsetMinSrc * 60000;
+      const dateUtc = new Date(utcTs);
+      const targetZones = [
+        { label: 'GMT (UTC)', tz: 'UTC' },
+        { label: 'PST (US/Pacific)', tz: 'America/Los_Angeles' },
+        { label: 'MST (US/Mountain)', tz: 'America/Denver' },
+        { label: 'CST (US/Central)', tz: 'America/Chicago' },
+        { label: 'EST (US/Eastern)', tz: 'America/New_York' }
+      ];
+      const rows = targetZones.map(({ label, tz }) => {
+        const opts = {
+          timeZone: tz,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        };
+        const formatted = new Intl.DateTimeFormat('en-US', opts).format(dateUtc);
+        return `<tr><td>${label}</td><td>${formatted}</td></tr>`;
+      }).join('');
+      tzResult.innerHTML = `
+        <strong>Converted Times:</strong>
+        <table class="table table-dark table-striped mt-2">
+          <thead><tr><th>Timezone</th><th>Local Time</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    });
+
+    // UUID Generator
+    const generateUuidBtn = document.getElementById('generate-uuid-btn');
+    const uuidOutput = document.getElementById('uuid-output');
+    const copyUuidBtn = document.getElementById('copy-uuid-btn');
+
+    generateUuidBtn.addEventListener('click', () => {
+      const uuid = (crypto.randomUUID)
+        ? crypto.randomUUID()
+        : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+          });
+      uuidOutput.value = uuid;
+    });
+
+    copyUuidBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(uuidOutput.value);
+      alert('UUID copied to clipboard!');
+    });
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js');
+    }
+
+  
+  
   </script>
 </body>
 </html>
