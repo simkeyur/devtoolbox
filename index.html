@@ -129,6 +129,19 @@
       background-color: #666 !important;
       border-color: #777 !important;
     }
+
+    /* Color Mixer Styles */
+    #mixed-color-display .error-message { /* Ensure error messages are centered */
+        text-align: center;
+        margin-top: 20px; /* Add some space for error messages */
+    }
+    #mixed-color-display { /* Container for the result */
+        min-height: 220px; /* Min height to accommodate the result card + margins */
+        display: flex; /* To help center the single result card if needed */
+        justify-content: center; /* Center the card horizontally */
+        align-items: flex-start; /* Align card to the top of this container */
+        padding-top: 0; /* JS adds margin to the card, so display div might not need extra padding */
+    }
   </style>
 </head>
 <body>
@@ -238,6 +251,20 @@
         <input type="text" id="hex-color-input" class="form-control mb-3" placeholder="Enter color name or hex code (e.g., Green or #00FF00)">
         <button id="generate-shades-btn" class="btn btn-primary w-100 mb-3">Generate Shades</button>
         <div id="shades-display" class="mt-3"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="panel">
+        <h2>Color Mixer</h2>
+        <input type="text" id="color-mixer-input1" class="form-control mb-2" placeholder="Enter first color (name or hex)">
+        <input type="text" id="color-mixer-input2" class="form-control mb-3" placeholder="Enter second color (name or hex)">
+        <button id="mix-colors-btn" class="btn btn-primary w-100 mb-3">Mix Colors</button>
+        <div id="mixed-color-display" class="mt-3"></div>
       </div>
     </div>
   </div>
@@ -614,7 +641,9 @@
         "cyan": "#00FFFF", "magenta": "#FF00FF", "gray": "#808080",
         "grey": "#808080", "maroon": "#800000", "olive": "#808000",
         "lime": "#00FF00", "aqua": "#00FFFF", "teal": "#008080",
-        "navy": "#000080", "purple": "#800080", "silver": "#C0C0C0"
+        "navy": "#000080", "purple": "#800080", "silver": "#C0C0C0",
+        "orange": "#FFA500", "pink": "#FFC0CB", "brown": "#A52A2A",
+        "gold": "#FFD700", "violet": "#EE82EE", "indigo": "#4B0082"
       };
       if (colorMap[lowerColorName]) {
         return colorMap[lowerColorName];
@@ -737,6 +766,119 @@
         shadeItem.appendChild(copyBtn);
         shadesDisplay.appendChild(shadeItem);
       });
+    });
+
+    // Color Mixer
+    const colorMixerInput1 = document.getElementById('color-mixer-input1');
+    const colorMixerInput2 = document.getElementById('color-mixer-input2');
+    const mixColorsBtn = document.getElementById('mix-colors-btn');
+    const mixedColorDisplay = document.getElementById('mixed-color-display');
+
+    function hexToRgb(hex) {
+      if (!isValidHex(hex)) return null; // isValidHex is already defined
+      let hexValue = hex.replace('#', '');
+      const r = parseInt(hexValue.substring(0, 2), 16);
+      const g = parseInt(hexValue.substring(2, 4), 16);
+      const b = parseInt(hexValue.substring(4, 6), 16);
+      return { r, g, b };
+    }
+
+    function rgbToHex(r, g, b) {
+      const rHex = r.toString(16).padStart(2, '0');
+      const gHex = g.toString(16).padStart(2, '0');
+      const bHex = b.toString(16).padStart(2, '0');
+      return `#${rHex}${gHex}${bHex}`;
+    }
+
+    function mixColors(hex1, hex2) {
+      const rgb1 = hexToRgb(hex1);
+      const rgb2 = hexToRgb(hex2);
+
+      if (!rgb1 || !rgb2) return null;
+
+      const mixedR = Math.round((rgb1.r + rgb2.r) / 2);
+      const mixedG = Math.round((rgb1.g + rgb2.g) / 2);
+      const mixedB = Math.round((rgb1.b + rgb2.b) / 2);
+
+      return rgbToHex(mixedR, mixedG, mixedB);
+    }
+
+    mixColorsBtn.addEventListener('click', () => {
+      mixedColorDisplay.innerHTML = ''; // Clear previous result
+
+      const input1 = colorMixerInput1.value.trim();
+      const input2 = colorMixerInput2.value.trim();
+
+      if (!input1 || !input2) {
+        mixedColorDisplay.innerHTML = '<p class="error-message">Please enter both colors.</p>';
+        return;
+      }
+
+      const hex1 = colorNameToHex(input1); // Reuse existing function
+      const hex2 = colorNameToHex(input2); // Reuse existing function
+
+      if (!hex1 || !isValidHex(hex1) || !hex2 || !isValidHex(hex2)) {
+        let errorMsg = "Error: Invalid color provided. Ensure both inputs are valid (e.g., #RRGGBB or known color name).";
+        // It's better to check each one individually to give a more specific error.
+        if (!hex1 || !isValidHex(hex1)) {
+            errorMsg = `Error: First color ("${input1}") is invalid. Please use format #RRGGBB or a known color name.`;
+        } else if (!hex2 || !isValidHex(hex2)) {
+            errorMsg = `Error: Second color ("${input2}") is invalid. Please use format #RRGGBB or a known color name.`;
+        }
+        mixedColorDisplay.innerHTML = `<p class="error-message">${errorMsg}</p>`;
+        return;
+      }
+
+      const finalHex1 = hex1.startsWith('#') ? hex1 : '#' + hex1;
+      const finalHex2 = hex2.startsWith('#') ? hex2 : '#' + hex2;
+
+      const mixedHex = mixColors(finalHex1, finalHex2);
+
+      if (!mixedHex) {
+        mixedColorDisplay.innerHTML = '<p class="error-message">Could not mix colors due to an unexpected issue.</p>';
+        return;
+      }
+
+      const resultItem = document.createElement('div');
+      resultItem.className = 'd-flex flex-column align-items-center p-3 rounded';
+      resultItem.style.backgroundColor = '#252525';
+      resultItem.style.border = '1px solid #444';
+      resultItem.style.borderRadius = '6px';
+      resultItem.style.maxWidth = '200px';
+      resultItem.style.margin = '20px auto'; // Add some top margin and center
+
+      const previewBox = document.createElement('div');
+      previewBox.style.width = '100px';
+      previewBox.style.height = '100px';
+      previewBox.style.backgroundColor = mixedHex;
+      previewBox.style.border = '1px solid #555';
+      previewBox.style.borderRadius = '4px';
+      previewBox.style.marginBottom = '10px'; // Increased margin
+
+      const resultText = document.createElement('span');
+      resultText.textContent = mixedHex;
+      resultText.style.fontFamily = 'monospace';
+      resultText.style.color = '#f0f0f0';
+      resultText.style.marginBottom = '10px'; // Increased margin
+      resultText.style.fontSize = '1.1em'; // Larger font for result
+
+      const copyBtn = document.createElement('button');
+      copyBtn.textContent = 'Copy Mixed Color';
+      copyBtn.className = 'btn btn-sm btn-secondary w-100';
+      copyBtn.style.backgroundColor = '#555';
+      copyBtn.style.borderColor = '#666';
+      copyBtn.style.marginTop = '5px'; // Add some margin top
+
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(mixedHex)
+          .then(() => alert(`Copied ${mixedHex} to clipboard!`))
+          .catch(err => console.error('Failed to copy mixed color: ', err));
+      });
+
+      resultItem.appendChild(previewBox);
+      resultItem.appendChild(resultText);
+      resultItem.appendChild(copyBtn);
+      mixedColorDisplay.appendChild(resultItem);
     });
 
     if ('serviceWorker' in navigator) {
