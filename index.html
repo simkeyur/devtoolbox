@@ -267,6 +267,15 @@
         <div id="mixed-color-display" class="mt-3"></div>
       </div>
     </div>
+
+    <!-- Random Number Generator -->
+    <div class="col-md-6">
+      <div class="panel">
+        <h2>Random Number Generator</h2>
+        <button id="generate-random-number-btn" class="btn btn-primary w-100 mb-3">Generate Random Number (10-100)</button>
+        <div id="random-number-display" class="form-control" style="text-align: center; font-weight: bold; font-size: 1.2em;" readonly>Click the button to generate a number.</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -879,6 +888,18 @@
       resultItem.appendChild(resultText);
       resultItem.appendChild(copyBtn);
       mixedColorDisplay.appendChild(resultItem);
+    });
+
+    // Random Number Generator
+    const generateRandomBtn = document.getElementById('generate-random-number-btn');
+    const randomNumberDisplay = document.getElementById('random-number-display');
+
+    generateRandomBtn.addEventListener('click', () => {
+      // Generate a random number between 10 and 100 (inclusive)
+      const min = 10;
+      const max = 100;
+      const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+      randomNumberDisplay.textContent = randomNumber;
     });
 
     if ('serviceWorker' in navigator) {
